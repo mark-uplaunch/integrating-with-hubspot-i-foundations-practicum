@@ -6,6 +6,7 @@ html
         link(rel="stylesheet", href="css/style.css")
     body    
         h1 Update/Add Vehicle Entries
+        a.add-link(href="/") Return to the homepage
         form(action="/update-cobj" method="POST")
             table
                 thead
@@ -15,39 +16,60 @@ html
                     th Type
 
                 tbody
-                each vehicle, index in data
+                    each vehicle, index in data
+                        tr
+                        // Hidden ID field if your object has an ID
+                        input(
+                            type="hidden"
+                            name=`vehicles[${index}][id]`
+                            value=vehicle.id
+                        )
+
+                        td
+                            input(
+                            type="text"
+                            name=`vehicles[${index}][name]`
+                            value=vehicle.properties.name
+                            required
+                            )
+
+                        td
+                            input(
+                            type="text"
+                            name=`vehicles[${index}][brand]`
+                            value=vehicle.properties.brand
+                            required
+                            )
+
+                        td
+                            input(
+                            type="text"
+                            name=`vehicles[${index}][type]`
+                            value=vehicle.properties.type
+                            required
+                            )
+                    //Add single row for record creation
                     tr
-                    // Hidden ID field if your object has an ID
-                    input(
-                        type="hidden"
-                        name=`vehicles[${index}][id]`
-                        value=vehicle.id
-                    )
+                        td
+                            input(
+                                type="text"
+                                name=`vehicles[${data.length}][name]`
+                                placeholder="Enter name"
+                            )
 
-                    td
-                        input(
-                        type="text"
-                        name=`vehicles[${index}][name]`
-                        value=vehicle.properties.name
-                        required
-                        )
+                        td
+                            input(
+                                type="text"
+                                name=`vehicles[${data.length}][brand]`
+                                placeholder="Enter brand"
+                            )
 
-                    td
-                        input(
-                        type="text"
-                        name=`vehicles[${index}][brand]`
-                        value=vehicle.properties.brand
-                        required
-                        )
-
-                    td
-                        input(
-                        type="text"
-                        name=`vehicles[${index}][type]`
-                        value=vehicle.properties.type
-                        required
-                        )
-
+                        td
+                            input(
+                                type="text"
+                                name=`vehicles[${data.length}][type]`
+                                placeholder="Enter type"
+                            )
             br
 
             button(type="submit") Save Changes

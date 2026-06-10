@@ -23,7 +23,7 @@ app.get('/', async (req, res) => {
     try {
         const resp = await axios.get(vehicles, { headers });
         const data = resp.data.results;
-        console.log(data);
+        //console.log(data);
         res.render('homepage', { title: 'Vehicles | HubSpot APIs', data });      
     } catch (error) {
         console.error(error);
@@ -44,7 +44,7 @@ app.get('/update-cobj', async (req, res) => {
     try {
         const resp = await axios.get(vehicles, { headers });
         const data = resp.data.results;
-        console.log(data);   
+        //console.log(data);   
         res.render('updates', { title: 'Update Custom Object Form | Integrating With HubSpot I Practicum', data });  
     } catch (error) {
         console.error(error);
@@ -56,17 +56,42 @@ app.get('/update-cobj', async (req, res) => {
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
 
 app.post('/update-cobj', async (req, res) => {
-    const updates = req.body.vehicles.map(vehicle => ({
-        id: vehicle.id,
-        properties: {
-            name: vehicle.name,
-            brand: vehicle.brand,
-            type: vehicle.type
-        }
-    }));
+    //Separate items to update and create
+    const { to_update, to_create } = req.body.vehicles.reduce(
+        (result, vehicle) => {
+            const payload = {
+            properties: {
+                name: vehicle.name,
+                brand: vehicle.brand,
+                type: vehicle.type
+            }
+            };
 
+            if (vehicle.id) {
+            result.to_update.push({
+                id: vehicle.id,
+                ...payload
+            });
+            } else {
+            const hasValues = [vehicle.name, vehicle.brand, vehicle.type]
+                .some(value => value && value.trim() !== '');
+
+            if (hasValues) {
+                result.to_create = payload;
+            }
+            }
+
+            return result;
+        },
+        {
+            to_update: [],
+            to_create: null
+        }
+    );
+
+    //Handle record update (By Batch)
     const update_payload = JSON.stringify({
-        inputs: updates
+        inputs: to_update
     })
     
     const updateVehicles = `https://api.hubapi.com/crm/v3/objects/2-217083325/batch/update`;
@@ -77,12 +102,26 @@ app.post('/update-cobj', async (req, res) => {
 
     try { 
         await axios.post(updateVehicles, update_payload, { headers } );
-        res.redirect('/');
+        
     } catch(err) {
         console.error(err);
     }
 
-
+    //Handle single record creation
+    if(!to_create) { res.redirect('/'); }
+    else {
+        const createVehicle = `https://api.hubapi.com/crm/v3/objects/2-217083325`;
+        const headers = {
+            Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+            'Content-Type': 'application/json'
+        };
+        try { 
+            await axios.post(createVehicle, to_create, { headers } );
+            res.redirect('/');
+        } catch(err) {
+            console.error(err);
+        }
+    }
 });
 // * Code for Route 3 goes here
 
