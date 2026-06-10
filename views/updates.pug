@@ -1,0 +1,53 @@
+doctype html
+html 
+    head 
+        title= `${title}`
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", href="css/style.css")
+    body    
+        h1 Update/Add Vehicle Entries
+        form(action="/update-cobj" method="POST")
+            table
+                thead
+                tr
+                    th Name
+                    th Brand
+                    th Type
+
+                tbody
+                each vehicle, index in data
+                    tr
+                    // Hidden ID field if your object has an ID
+                    input(
+                        type="hidden"
+                        name=`vehicles[${index}][id]`
+                        value=vehicle.id
+                    )
+
+                    td
+                        input(
+                        type="text"
+                        name=`vehicles[${index}][name]`
+                        value=vehicle.properties.name
+                        required
+                        )
+
+                    td
+                        input(
+                        type="text"
+                        name=`vehicles[${index}][brand]`
+                        value=vehicle.properties.brand
+                        required
+                        )
+
+                    td
+                        input(
+                        type="text"
+                        name=`vehicles[${index}][type]`
+                        value=vehicle.properties.type
+                        required
+                        )
+
+            br
+
+            button(type="submit") Save Changes
